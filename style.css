@@ -114,6 +114,7 @@ h1 {
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 20px;
+    white-space: pre-wrap;
 }
 
 .btn-grid {
@@ -255,4 +256,128 @@ h1 {
     width: 0%;
     background-color: #007bff;
     transition: width 0.3s ease-in-out;
+}
+
+/* Drag and Drop Styles */
+.drag-drop-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.drag-options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    border: 1px dashed #007bff;
+    border-radius: 8px;
+    min-height: 80px;
+    align-items: center;
+    justify-content: center;
+    background-color: #eaf5ff;
+}
+
+.draggable {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: grab;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.draggable:active {
+    cursor: grabbing;
+}
+
+.drop-targets-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.drop-zone {
+    border: 2px dashed #6c757d;
+    border-radius: 8px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+    text-align: center;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.drop-zone.hover {
+    border-color: #28a745;
+    background-color: #e6ffe6;
+}
+
+.draggable.correct {
+    background-color: #28a745;
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.4);
+}
+
+.draggable.wrong {
+    background-color: #dc3545;
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.4);
+}
+
+.fill-in-the-blank-input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.fill-in-the-blank-input.correct {
+    border-color: #28a745;
+    background-color: #e9f7ef;
+}
+
+.fill-in-the-blank-input.wrong {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.submit-btn {
+    background-color: #28a745;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.submit-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#selection-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#selection-container h2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.selection-btn {
+    background-color: #6c757d;
+    margin: 0 10px;
+    padding: 12px 25px;
+}
+
+.selection-btn.selected {
+    background-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }
