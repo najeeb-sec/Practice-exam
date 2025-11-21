@@ -85,29 +85,4 @@ Contributions are welcome! Please follow these steps:
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
 
-## How to Push Updates to GitHub
-1. Add your changes:
-   ```bash
-   git add README.md
-   ```
-2. Commit your changes:
-   ```bash
-   git commit -m "Update README with live demo and instructions"
-   ```
-3. Push to GitHub:
-   ```bash
-   git push origin main
-   ```
-
----
-
-## GitHub Pages Deployment Guide
-1. Ensure your repository is public.
-2. Go to **Settings > Pages** in your GitHub repo.
-3. Under **Source**, select `main` branch and `/root` folder.
-4. Save settings and wait for the site to build.
-5. Access your live site at:
-   ```
-   https://<your-username>.github.io/<repository-name>/
