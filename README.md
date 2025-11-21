@@ -60,7 +60,8 @@ Access the live application here:
 ---
 
 ## Screenshots
-![Screenshot Placeholder](https://via.placeholder.com/800x400.png?text=App+Screenshot)
+
+<img width="866" height="248" alt="Screenshot 2025-11-21 at 12 23 52 AM" src="https://github.com/user-attachments/assets/b91a3d1b-aac2-4c74-8425-ea4e5e230b4c" />
 
 ---
 
