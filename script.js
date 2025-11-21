@@ -13,74 +13,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const examDetailsElement = document.getElementById('exam-details');
     const progressBar = document.getElementById('progress-bar');
     const resultsSummaryContainer = document.getElementById('results-summary-container');
+    const selectionContainer = document.getElementById('selection-container');
+    const questionsAButton = document.getElementById('questionsA-btn');
+    const questionsBButton = document.getElementById('questionsB-btn');
+    const questionsCButton = document.getElementById('questionsC-btn');
+
+    nextButton.addEventListener('click', handleNextButton);
 
     let allQuestions = [];
     let shuffledQuestions, currentQuestionIndex;
     let correctScore, wrongScore;
     let timer;
     let timeRemaining = 5400; // 90 minutes in seconds
-        let isPaused = false;
-        let selectedAnswers = [];
-        const explanationContainer = document.getElementById('explanation-container');
-    
-        fetch('questions.json')
+    let isPaused = false;
+    let selectedAnswers = [];
+    const explanationContainer = document.getElementById('explanation-container');
+
+    questionsAButton.addEventListener('click', () => selectQuestionSet('questions.json', questionsAButton));
+    questionsBButton.addEventListener('click', () => selectQuestionSet('questions2.json', questionsBButton));
+    questionsCButton.addEventListener('click', () => selectQuestionSet('question3.json', questionsCButton));
+
+    function selectQuestionSet(fileName, selectedButton) {
+        fetch(fileName)
             .then(res => res.json())
             .then(data => {
-                allQuestions = data; // Keep original data structure
-                
-                // Prepare questions for the quiz, but keep original data handy
+                allQuestions = data;
                 const quizQuestions = data.map(q => {
                     if (q.type === 'fill-in-the-blank') {
                         return {
                             type: 'fill-in-the-blank',
                             question: q.question,
                             answer: q.answer,
-                            // Keep a reference to the original object if needed, or just use its ID
-                            originalId: q.id 
+                            originalId: q.id
+                        };
+                    } else if (q.type === 'drag-and-drop') {
+                        return {
+                            type: 'drag-and-drop',
+                            question: q.question,
+                            dragOptions: q.dragOptions,
+                            dropTargets: q.dropTargets,
+                            correctMapping: q.correctMapping,
+                            originalId: q.id
                         };
                     }
-    
                     const answers = Object.keys(q.options).map(key => ({
                         text: key + '. ' + q.options[key],
-                        correct: key === q.answer
+                        correct: Array.isArray(q.answer) ? q.answer.includes(key) : key === q.answer
                     }));
-    
                     return {
                         type: 'multiple-choice',
                         question: q.question,
                         answers: answers,
-                        originalId: q.id // Use ID to link back to original question object
+                        originalId: q.id
                     };
-                }).filter(q => (q.type === 'multiple-choice' && q.answers.some(a => a.correct)) || q.type === 'fill-in-the-blank');
-    
-                startButton.addEventListener('click', () => startGame(quizQuestions));
-                nextButton.addEventListener('click', handleNextButton);
-                pauseButton.addEventListener('click', togglePause);
+                }).filter(q => (q.type === 'multiple-choice' && q.answers.some(a => a.correct)) || q.type === 'fill-in-the-blank' || q.type === 'drag-and-drop');
+                
+                document.querySelectorAll('.selection-btn').forEach(btn => btn.classList.remove('selected'));
+                selectedButton.classList.add('selected');
+                startButton.classList.remove('hide');
+                startButton.onclick = () => startGame(quizQuestions);
             })
             .catch(error => console.error('Error loading questions:', error));
-    
-        function startGame(quizQuestions) {
-            shuffledQuestions = quizQuestions.sort(() => Math.random() - 0.5).slice(0, 90);
-            startButton.classList.add('hide');
-            examDetailsElement.classList.remove('hide');
-            questionContainerElement.classList.remove('hide');
-            scoreContainerElement.classList.remove('hide');
-            incorrectAnswersContainer.innerHTML = ''; // Clear previous results
-            incorrectAnswersContainer.classList.add('hide');
-            resultsSummaryContainer.classList.add('hide');
-            pauseButton.classList.remove('hide');
-    
-            currentQuestionIndex = 0;
-            correctScore = 0;
-            wrongScore = 0;
-            timeRemaining = 5400;
-            isPaused = false;
-            pauseButton.textContent = 'Pause';
-            updateScore();
-            
-            startTimer();
-            setNextQuestion();
-        }
+    }
+
+    function startGame(quizQuestions) {
+        selectionContainer.classList.add('hide');
+        shuffledQuestions = quizQuestions.sort(() => Math.random() - 0.5).slice(0, 90);
+        startButton.classList.add('hide');
+        examDetailsElement.classList.remove('hide');
+        questionContainerElement.classList.remove('hide');
+        scoreContainerElement.classList.remove('hide');
+        incorrectAnswersContainer.innerHTML = ''; // Clear previous results
+        incorrectAnswersContainer.classList.add('hide');
+        resultsSummaryContainer.classList.add('hide');
+        pauseButton.classList.remove('hide');
+
+        currentQuestionIndex = 0;
+        correctScore = 0;
+        wrongScore = 0;
+        timeRemaining = 5400;
+        isPaused = false;
+        pauseButton.textContent = 'Pause';
+        updateScore();
+        
+        startTimer();
+        setNextQuestion();
+    }
     
         function startTimer() {
             timer = setInterval(() => {
@@ -139,6 +157,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     checkAnswer(userAnswer);
                 });
                 answerButtonsElement.appendChild(submitButton);
+            } else if (question.type === 'drag-and-drop') {
+                const dragDropContainer = document.createElement('div');
+                dragDropContainer.classList.add('drag-drop-container');
+    
+                const dragOptionsContainer = document.createElement('div');
+                dragOptionsContainer.classList.add('drag-options-container');
+                question.dragOptions.forEach(option => {
+                    const draggable = document.createElement('div');
+                    draggable.classList.add('draggable');
+                    draggable.textContent = option.text;
+                    draggable.setAttribute('draggable', 'true');
+                    draggable.dataset.id = option.id;
+                    draggable.addEventListener('dragstart', dragStart);
+                    dragOptionsContainer.appendChild(draggable);
+                });
+                dragDropContainer.appendChild(dragOptionsContainer);
+    
+                const dropTargetsContainer = document.createElement('div');
+                dropTargetsContainer.classList.add('drop-targets-container');
+                question.dropTargets.forEach(target => {
+                    const dropZone = document.createElement('div');
+                    dropZone.classList.add('drop-zone');
+                    dropZone.textContent = target.text;
+                    dropZone.dataset.id = target.id;
+                    dropZone.addEventListener('dragover', dragOver);
+                    dropZone.addEventListener('drop', drop);
+                    dropTargetsContainer.appendChild(dropZone);
+                });
+                dragDropContainer.appendChild(dropTargetsContainer);
+                answerButtonsElement.appendChild(dragDropContainer);
+    
+                const submitButton = document.createElement('button');
+                submitButton.textContent = 'Submit';
+                submitButton.classList.add('btn', 'submit-btn');
+                submitButton.addEventListener('click', () => {
+                    checkAnswer();
+                });
+                answerButtonsElement.appendChild(submitButton);
+    
             } else {
                 const isMultipleAnswer = Array.isArray(allQuestions.find(q => q.id === question.originalId).answer);
 
@@ -164,6 +221,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     answerButtonsElement.appendChild(submitButton);
                 }
+            }
+        }
+    
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+        }
+    
+        function dragOver(e) {
+            e.preventDefault(); // Allow drop
+        }
+    
+        function drop(e) {
+            e.preventDefault();
+            const draggableId = e.dataTransfer.getData('text/plain');
+            const draggableElement = document.querySelector(`[data-id="${draggableId}"]`);
+            const dropZoneElement = e.target.closest('.drop-zone');
+    
+            if (dropZoneElement && draggableElement) {
+                // Remove from previous drop zone if it was already dropped
+                const previousDropZone = draggableElement.closest('.drop-zone');
+                if (previousDropZone) {
+                    previousDropZone.removeChild(draggableElement);
+                } else {
+                    // If it was in the drag options container, remove it from there
+                    const dragOptionsContainer = draggableElement.closest('.drag-options-container');
+                    if (dragOptionsContainer) {
+                        dragOptionsContainer.removeChild(draggableElement);
+                    }
+                }
+                dropZoneElement.appendChild(draggableElement);
+                // Store the mapping
+                selectedAnswers.push({
+                    dragId: draggableId,
+                    dropId: dropZoneElement.dataset.id
+                });
             }
         }
     
@@ -207,6 +299,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 setStatusClass(input, isCorrect);
                 input.disabled = true;
                 answerButtonsElement.querySelector('.submit-btn').disabled = true;
+            } else if (question.type === 'drag-and-drop') {
+                const correctMapping = originalQuestion.correctMapping;
+                let allCorrectlyMapped = true;
+                let userMappings = {};
+                
+                // Collect user's current mappings from the DOM
+                document.querySelectorAll('.drop-zone').forEach(dropZone => {
+                    const droppedItem = dropZone.querySelector('.draggable');
+                    if (droppedItem) {
+                        userMappings[droppedItem.dataset.id] = dropZone.dataset.id;
+                    }
+                });
+
+                // Check correctness and apply styling
+                document.querySelectorAll('.draggable').forEach(draggable => {
+                    const dragId = draggable.dataset.id;
+                    const userDropId = userMappings[dragId];
+                    const correctDropId = correctMapping[dragId];
+
+                    if (userDropId === correctDropId) {
+                        setStatusClass(draggable, true); // Correctly placed
+                    } else {
+                        setStatusClass(draggable, false); // Incorrectly placed
+                        allCorrectlyMapped = false;
+                    }
+                    draggable.setAttribute('draggable', 'false'); // Disable dragging after submission
+                });
+
+                isCorrect = allCorrectlyMapped && Object.keys(userMappings).length === Object.keys(correctMapping).length;
+                answerButtonsElement.querySelector('.submit-btn').disabled = true;
+
             } else if (isMultipleAnswer) {
                 const correctKeys = originalQuestion.answer;
                 const selectedKeys = selectedAnswers.map(btn => btn.textContent.charAt(0));
@@ -258,6 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let userAnswerText;
                 if (question.type === 'fill-in-the-blank') {
                     userAnswerText = userAnswer;
+                } else if (question.type === 'drag-and-drop') {
+                    userAnswerText = JSON.stringify(userMappings); // Store user's mappings
                 } else {
                     userAnswerText = selectedAnswers.map(btn => btn.textContent).join(', ');
                 }
@@ -270,26 +395,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         function displayExplanation(originalQuestion) {
-            let optionsDetails = '';
-            if (originalQuestion && originalQuestion.explanation && originalQuestion.options) {
-                optionsDetails = '<ul>';
-                for (const key in originalQuestion.options) {
-                    const isCorrect = key === originalQuestion.answer;
-                    const explanationText = isCorrect 
-                        ? (originalQuestion.explanation.correct || '')
-                        : (originalQuestion.explanation.incorrect && originalQuestion.explanation.incorrect[key] ? originalQuestion.explanation.incorrect[key] : '');
-                    optionsDetails += `<li><strong>${key}:</strong> ${originalQuestion.options[key]}<br><em>${explanationText}</em></li>`;
-                }
-                optionsDetails += '</ul>';
+            if (!originalQuestion || !originalQuestion.explanation) {
+                explanationContainer.innerHTML = '';
+                explanationContainer.classList.add('hide');
+                return;
             }
-    
-            const referenceLink = (originalQuestion && originalQuestion.reference && originalQuestion.reference.link)
+        
+            let explanationHTML = '';
+        
+            // Handle multiple choice and fill-in-the-blank
+            if (originalQuestion.options) {
+                const correctAnswerKeys = Array.isArray(originalQuestion.answer) ? originalQuestion.answer : [originalQuestion.answer];
+                
+                let correctAnswerHTML = '<h4>Correct Answer</h4>';
+                correctAnswerKeys.forEach(key => {
+                    if (originalQuestion.options[key]) {
+                        correctAnswerHTML += `<p><strong>${key}. ${originalQuestion.options[key]}</strong></p>`;
+                    }
+                });
+                correctAnswerHTML += `<p><em>${originalQuestion.explanation.correct || ''}</em></p>`;
+        
+                let incorrectAnswersHTML = '<h4>Incorrect Answers</h4><ul>';
+                for (const key in originalQuestion.options) {
+                    if (!correctAnswerKeys.includes(key)) {
+                        const incorrectExplanation = (originalQuestion.explanation.incorrect && originalQuestion.explanation.incorrect[key]) ? originalQuestion.explanation.incorrect[key] : '';
+                        incorrectAnswersHTML += `<li><strong>${key}. ${originalQuestion.options[key]}</strong><br><em>${incorrectExplanation}</em></li>`;
+                    }
+                }
+                incorrectAnswersHTML += '</ul>';
+        
+                explanationHTML += correctAnswerHTML + incorrectAnswersHTML;
+            
+            // Handle drag-and-drop
+            } else if (originalQuestion.type === 'drag-and-drop') {
+                let correctMappingHTML = '<h4>Correct Mapping:</h4><ul>';
+                for (const dragId in originalQuestion.correctMapping) {
+                    const dropId = originalQuestion.correctMapping[dragId];
+                    const dragText = originalQuestion.dragOptions.find(opt => opt.id === dragId).text;
+                    const dropText = originalQuestion.dropTargets.find(target => target.id === dropId).text;
+                    correctMappingHTML += `<li>${dragText} -> ${dropText}</li>`;
+                }
+                correctMappingHTML += '</ul>';
+                
+                explanationHTML += correctMappingHTML;
+                
+                // Also show general correct explanation if available
+                if (originalQuestion.explanation.correct) {
+                     explanationHTML += `<p><em>${originalQuestion.explanation.correct}</em></p>`;
+                }
+            } else {
+                // Fallback for other types or if no options
+                explanationHTML = `<p><em>${originalQuestion.explanation.correct || ''}</em></p>`;
+            }
+        
+        
+            const referenceLink = (originalQuestion.reference && originalQuestion.reference.link)
                 ? `<a href="${originalQuestion.reference.link}" target="_blank">${originalQuestion.reference.objective || originalQuestion.reference.link}</a>`
                 : 'N/A';
-    
+        
             explanationContainer.innerHTML = `
-                <h4>Explanation:</h4>
-                <div>${optionsDetails}</div>
+                ${explanationHTML}
                 <p><strong>Reference:</strong> ${referenceLink}</p>
             `;
             explanationContainer.classList.remove('hide');
@@ -322,12 +487,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalQuestion = allQuestions.find(q => q.id === question.originalId);
             const element = document.createElement('div');
             element.classList.add('incorrect-answer');
-            let correctAnswerHTML;
+            let correctAnswerHTML = '';
             let optionsDetails = '';
             const isMultipleAnswer = Array.isArray(originalQuestion.answer);
     
             if (question.type === 'fill-in-the-blank') {
                 correctAnswerHTML = `<p><strong>Correct Answer:</strong> ${originalQuestion.answer}</p>`;
+            } else if (question.type === 'drag-and-drop') {
+                const userMappings = JSON.parse(userAnswerText);
+                const correctMapping = originalQuestion.correctMapping;
+                
+                let userMappingHTML = '<p><strong>Your Mapping:</strong></p><ul>';
+                for (const dragId in userMappings) {
+                    const dropId = userMappings[dragId];
+                    const dragText = originalQuestion.dragOptions.find(opt => opt.id === dragId).text;
+                    const dropText = originalQuestion.dropTargets.find(target => target.id === dropId).text;
+                    userMappingHTML += `<li>${dragText} -> ${dropText}</li>`;
+                }
+                userMappingHTML += '</ul>';
+
+                let correctMappingHTML = '<p><strong>Correct Mapping:</strong></p><ul>';
+                for (const dragId in correctMapping) {
+                    const dropId = correctMapping[dragId];
+                    const dragText = originalQuestion.dragOptions.find(opt => opt.id === dragId).text;
+                    const dropText = originalQuestion.dropTargets.find(target => target.id === dropId).text;
+                    correctMappingHTML += `<li>${dragText} -> ${dropText}</li>`;
+                }
+                correctMappingHTML += '</ul>';
+
+                correctAnswerHTML = userMappingHTML + correctMappingHTML;
+
             } else if (isMultipleAnswer) {
                 const correctKeys = originalQuestion.answer;
                 const correctValues = correctKeys.map(key => `${key}. ${originalQuestion.options[key]}`);
