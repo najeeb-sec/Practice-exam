@@ -12,7 +12,7 @@ This project is a web-based practice exam simulator for the **CompTIA Security+ 
 
 ## Live Demo
 Access the live application here:  
-👉 [https://najibullahniazi6285-stack.github.io/Practice-exam/](https://najibullahniazi6285-stack.github.io/Practice-exam/)
+👉 [https://najibullahniazi6285-stack.github.io/Practice-exam/](CompTIA Security+ Practice Exam)
 
 ---
 
