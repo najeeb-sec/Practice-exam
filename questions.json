@@ -184,28 +184,35 @@
     }
   },
   {
-    "id": "A14",
-    "question": "An insurance company has created a set of policies to handle data access for their customer database. The policies state that access to sensitive customer data should be restricted based on the user's location and the time of day. Which of the following access control methods would BEST enforce these policies?",
-    "options": {
-      "A": "Restrict login access by IP address and GPS location",
-      "B": "Require government-issued identification",
-      "C": "Add additional password complexity for accounts that access data",
-      "D": "Conduct monthly permission auditing"
+  "id": "A14",
+  "question": "An insurance company has created a set of policies to handle data breaches. The security team has been given this set of requirements based on these policies:\n• Access records from all devices must be saved and archived\n• Any data access outside of normal working hours must be immediately reported\n• Data access must only occur inside of the country\n• Access logs and audit reports must be created from a single database\n\nWhich of the following should be implemented by the security team to meet these requirements? (Select THREE)",
+  "options": {
+    "A": "Restrict login access by IP address and GPS location",
+    "B": "Require government-issued identification during the onboarding process",
+    "C": "Add additional password complexity for accounts that access data",
+    "D": "Conduct monthly permission auditing",
+    "E": "Consolidate all logs on a SIEM",
+    "F": "Archive the encryption keys of all disabled accounts",
+    "G": "Enable time-of-day restrictions on the authentication server"
+  },
+  "answer": ["A", "E", "G"],
+  "explanation": {
+    "correct": {
+      "A": "Adding location-based policies will prevent direct data access from outside of the country.",
+      "E": "Saving log information from all devices and creating audit reports from a single database can be implemented through the use of a SIEM.",
+      "G": "Adding a check for the time-of-day will report any access that occurs during non-working hours."
     },
-    "answer": "A",
-    "explanation": {
-      "correct": "Restricting login access by IP address and GPS location directly enforces policies based on a user's geographical location, while time-based restrictions can be implemented alongside these controls.",
-      "incorrect": {
-        "B": "Requiring government-issued identification is part of an identity verification or onboarding process, not a method for restricting access based on location or time.",
-        "C": "Additional password complexity is another good best practice, but it’s not directly related to restricting access based on location or time.",
-        "D": "No requirements for ongoing auditing were included in the requirements, and auditing is a detective control, not a preventive one for real-time access restriction."
-      }
-    },
-    "reference": {
-      "objective": "SY0-701, Objective 4.6 - Access Controls",
-      "link": "https://professormesser.link/701040602"
+    "incorrect": {
+      "B": "Requiring proper identification is always a good idea, but it’s not one of the listed requirements.",
+      "C": "Additional password complexity is another good best practice, but it’s not part of the provided requirements.",
+      "D": "No requirements for ongoing auditing were included in the requirements, but ongoing auditing is always an important consideration.",
+      "F": "Archiving encryption keys is useful for data recovery, but it’s not part of the listed requirements."
     }
   },
+  "reference": "SY0-701, Objective 4.6 - Access Controls",
+  "link": "https://professormesser.link/701040602"
+}
+
   {
     "id": "A15",
     "question": "A security engineer, is viewing this record from the firewall logs:\nBlocked: Download of malware from 192.168.1.100 -> 136.127.92.171:80 (HTTP)\nMalware Type: Trojan.Generic",
@@ -1982,6 +1989,34 @@
     "reference": {
       "objective": "SY0-701, Objective 1.5 - Command-line Tools",
       "link": "https://professormesser.link/701010501"
+    }
+  },
+  {
+    "id": "PBQ3",
+    "type": "drag-and-drop",
+    "question": "Drag and drop the security control types to their correct categories.",
+    "dragOptions": [
+      {"id": "firewall", "text": "Firewall"},
+      {"id": "ids", "text": "IDS"},
+      {"id": "encryption", "text": "Encryption"},
+      {"id": "audit_log", "text": "Audit Log"}
+    ],
+    "dropTargets": [
+      {"id": "preventive", "text": "Preventive"},
+      {"id": "detective", "text": "Detective"}
+    ],
+    "correctMapping": {
+      "firewall": "preventive",
+      "ids": "detective",
+      "encryption": "preventive",
+      "audit_log": "detective"
+    },
+    "explanation": {
+      "correct": "Firewalls and encryption are preventive controls as they stop attacks. IDS and audit logs are detective controls as they identify and record events."
+    },
+    "reference": {
+      "objective": "SY0-701, Objective 1.1 - Security Controls",
+      "link": "https://professormesser.link/701010101"
     }
   }
 ]
